@@ -4,8 +4,6 @@ import * as Yup from 'yup';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { uuid } from '../../utils';
-import * as mdb from 'mdb-ui-kit';
-import { Input, Button } from 'mdb-ui-kit';
 import axios from 'axios';
 import { BACKEND_DOMAIN_API } from '../../global';
 
@@ -26,6 +24,7 @@ const Register = () => {
       username: '',
       name: '',
       phone: '',
+      role: 'CUSTOMER'
     },
     validationSchema: validattion,
     onSubmit(values) {
@@ -37,20 +36,24 @@ const Register = () => {
     const listPrevUser = await axios.get(`${BACKEND_DOMAIN_API}/api/v1/users`);
     const arrUser = listPrevUser.data;
     const findExistUser = arrUser.findIndex((item) => item.email === user.email);
-    if(findExistUser >= 0){
+    if (findExistUser >= 0) {
       alert('Email đã tồn tại!');
-    } else{
-      const requestRegiter = await axios.post(`${BACKEND_DOMAIN_API}/api/v1/users`, user);
-      if(requestRegiter.status === 201){
-        alert('Đăng ký thành công!');
-        navigate('/auth/login');
+    } else {
+      if (user.password === user.cfPassword) {
+        const requestRegiter = await axios.post(`${BACKEND_DOMAIN_API}/api/v1/users`, user);
+        if (requestRegiter.status === 201) {
+          alert('Đăng ký thành công!');
+          navigate('/auth/login');
+        }
+      } else {
+        alert('Mật khẩu nhập lại không trùng khớp!');
       }
     }
-  } 
+  }
   return (
     <div className='container-register-page'>
       <h1 className='register-name'>Đăng ký</h1>
-      <form >
+      <form onSubmit={handleSubmit}>
         <div className='row'>
           <label>Username <strong className='red'>*</strong></label>
         </div>
@@ -63,7 +66,7 @@ const Register = () => {
           <label>Name</label>
         </div>
         <div className='row'>
-          <input type="text" name='name' placeholder='Nhập name'/>
+          <input type="text" name='name' placeholder='Nhập name' />
         </div>
 
         <div className='row'>
@@ -94,7 +97,7 @@ const Register = () => {
           <label>Confirm Password <strong className='red'>*</strong></label>
         </div>
         <div className='row'>
-          <input type="password" name='cfPassword' placeholder='Nhập lại password' value={values.cfPassword} onChange={handleChange} onBlur={handleBlur}/>
+          <input type="password" name='cfPassword' placeholder='Nhập lại password' value={values.cfPassword} onChange={handleChange} onBlur={handleBlur} />
         </div>
         {touched.cfPassword && !isValid && errors.cfPassword && (<p className='red'>{errors.cfPassword}</p>)}
 
